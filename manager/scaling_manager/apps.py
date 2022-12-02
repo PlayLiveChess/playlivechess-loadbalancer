@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 from django.core.cache import cache
-from .server import ServerManager
+from .server_classes import ServerManager
 
 class ScalingManagerConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'

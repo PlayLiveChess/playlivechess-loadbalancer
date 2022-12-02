@@ -2,7 +2,7 @@ import threading
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.core.cache import cache
-from .server import ServerManager
+from .server_classes import ServerManager
 
 def available_gameserver(request):
     socket_address = cache.get("available_gameserver")
