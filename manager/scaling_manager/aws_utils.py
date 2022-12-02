@@ -57,7 +57,14 @@ def launch_gameserver():
     task_arn = response['tasks'][0]["taskArn"]
     print(task_arn)
     
+def stop_gameserver_task(task_arn: str, reason_to_stop: str = "Not specified"):
+        response = ecs_client.stop_task(
+            cluster='Gameservers',
+            task=task_arn,
+            reason=reason_to_stop
+        )
 
-task_arn = "76742d1112524adaa763dbd2cb1b1841" # technically this isn't arn, it is task id
+task_id = "f938a4be0bf74410af456d2a4c80fca1" # technically this isn't arn, it is task id; however aws sdk accepts both
 
-get_address(task_arn)
+stop_gameserver_task(task_id)
+# launch_gameserver()
