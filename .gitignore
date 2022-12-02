@@ -1,0 +1,7 @@
+.venv
+.vscode
+db.sqlite3
+*__pycache__*
+
+manager/scaling_manager/runtask_response copy.json
+manager/scaling_manager/runtask_response.json
