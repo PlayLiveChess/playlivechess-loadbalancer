@@ -1,9 +1,9 @@
 import boto3
 import botocore
-import json
+from django.conf import settings
 
-ecs_client = boto3.client("ecs")
-ec2_client = boto3.client("ec2")
+ecs_client = boto3.client("ecs", region_name = settings.AWS_REGION)
+ec2_client = boto3.client("ec2", region_name = settings.AWS_REGION)
 
 def get_address(task_arn: str):
     task_waiter = ecs_client.get_waiter('tasks_running')
