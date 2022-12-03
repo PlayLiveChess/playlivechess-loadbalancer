@@ -42,12 +42,13 @@ def get_address(task_arn: str):
         gs_ip: str = str(ec2_instance_description['PublicIpAddress'])
 
         gs_address = gs_ip + ":" + gs_port
-        print(gs_address)
+        # print(gs_address)
+        return gs_address
     
     except botocore.exceptions.WaiterError as e:
         print(e.message)
 
-def launch_gameserver():
+def launch_gameserver() -> str:
     response = ecs_client.run_task(
         taskDefinition='LaunchGameserver',
         launchType='EC2',
@@ -55,16 +56,25 @@ def launch_gameserver():
         count=1
     )
     task_arn = response['tasks'][0]["taskArn"]
-    print(task_arn)
+    return task_arn
+
+def get_gameserver_tasks() -> list:
+    task_arns = ecs_client.list_tasks(
+        cluster='Gameservers',
+        family='LaunchGameserver',
+        desiredStatus='RUNNING'
+    )['taskArns']
+    return task_arns
     
 def stop_gameserver_task(task_arn: str, reason_to_stop: str = "Not specified"):
-        response = ecs_client.stop_task(
-            cluster='Gameservers',
-            task=task_arn,
-            reason=reason_to_stop
-        )
+    response = ecs_client.stop_task(
+        cluster='Gameservers',
+        task=task_arn,
+        reason=reason_to_stop
+    )
 
 task_id = "f938a4be0bf74410af456d2a4c80fca1" # technically this isn't arn, it is task id; however aws sdk accepts both
 
-stop_gameserver_task(task_id)
+# stop_gameserver_task(task_id)
 # launch_gameserver()
+# print(get_gameserver_tasks())

@@ -5,13 +5,13 @@ from django.core.cache import cache
 from .server_classes import ServerManager
 
 def available_gameserver(request):
-    socket_address = cache.get("available_gameserver")
-    return HttpResponse(socket_address)
+    gameserver_manager = cache.get("gameserver_manager")
+    return HttpResponse(gameserver_manager.get_available_server().address)
 
 def available_gameserver_list(request):
     gameserver_manager = cache.get("gameserver_manager")
     server_list = gameserver_manager.get_available_servers()
-    return HttpResponse('\n'.join(server_list))
+    return HttpResponse('\n'.join(s.address for s in server_list))
 
 def add(request):
     if(cache.get("thread_running")):
