@@ -18,8 +18,9 @@ import os
 env = environ.Env(
     # set casting, default value
     DEBUG=(bool, False),
-    UPSCALE_MARGIN=(int, 1998),
-    DOWNSCALE_MARGIN=(int, 2999),
+    UPSCALE_MARGIN=(int, 999),
+    DOWNSCALE_MARGIN=(int, 2000),
+    GAMESERVER_CAPACITY=(int, 1000),
     SLEEP_TIME=(int, 60)
 )
 
@@ -142,3 +143,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 UPSCALE_MARGIN = env('UPSCALE_MARGIN')
 DOWNSCALE_MARGIN = env('DOWNSCALE_MARGIN')
 SLEEP_TIME = env('SLEEP_TIME')
+GAMESERVER_CAPACITY = env('GAMESERVER_CAPACITY')
+
+assert (DOWNSCALE_MARGIN - UPSCALE_MARGIN) > GAMESERVER_CAPACITY
