@@ -1,6 +1,7 @@
 from time import sleep
 from tokenize import String
 from django.core.cache import cache
+from django.conf import settings
 import requests
 from .aws_utils import launch_gameserver, get_address, stop_gameserver_task, get_gameserver_tasks
 
@@ -34,8 +35,8 @@ class ServerManager():
         self.total_available_capacity: int = 0
         for s in self.available_servers:
             self.total_available_capacity += s.available_capacity
-        self.upscale_margin: int = 100
-        self.downscale_margin: int = 200
+        self.upscale_margin: int = settings.UPSCALE_MARGIN
+        self.downscale_margin: int = settings.DOWNSCALE_MARGIN
 
     def add_server(self):
         gs_task = launch_gameserver()
