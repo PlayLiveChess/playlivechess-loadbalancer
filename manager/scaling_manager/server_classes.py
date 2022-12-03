@@ -67,6 +67,7 @@ class ServerManager():
     def server_update(self) -> None:
         print("Starting server_update")
 
+        self.total_available_capacity = 0
         for s in self.available_servers:
             s.update_state()
             self.total_available_capacity += s.available_capacity
