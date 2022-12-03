@@ -2,6 +2,12 @@
 
 Experimental django app to learn aws sdk (aws sdk for python = boto3) and threading in django
 
+## Functionality
+
+* Hit the available-server api to get gameserver
+* Hit the available-server-list api to get list of gameservers running
+* Hit the update api to update health status of all servers and scale accordingly
+
 ## Some notes about design
 
 * For now computing power provided by RUNNING EC2 instances in the cluster are assumed to be suffiecient to meet the demand. This may not be the case always as one EC2 instance can only handle limited number of container instances

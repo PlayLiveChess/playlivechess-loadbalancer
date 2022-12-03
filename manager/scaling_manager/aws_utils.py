@@ -72,8 +72,7 @@ def stop_gameserver_task(task_arn: str, reason_to_stop: str = "Not specified"):
         task=task_arn,
         reason=reason_to_stop
     )
-
-task_id = "f938a4be0bf74410af456d2a4c80fca1" # technically this isn't arn, it is task id; however aws sdk accepts both
+    pass
 
 # stop_gameserver_task(task_id)
 # launch_gameserver()
