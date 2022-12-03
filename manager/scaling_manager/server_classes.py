@@ -13,7 +13,7 @@ class Server():
         self.status: str = 'RUNNING' # 'RUNNING'|'PENDING'|'STOPPED'
         self.available_capacity: int = 0
         self.ready_to_close: bool = False
-        self.update_state()
+        # self.update_state()
         
     def update_state(self):
         """
