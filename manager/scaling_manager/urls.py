@@ -20,5 +20,4 @@ from . import views
 urlpatterns = [
     path('available-gameserver/', views.available_gameserver, name='available_gameserver'),
     path('available-gameserver-list/', views.available_gameserver_list, name='available_gameserver_list'),
-    path('update/', views.server_update, name='server_update'),
 ]
