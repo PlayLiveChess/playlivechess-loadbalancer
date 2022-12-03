@@ -11,22 +11,34 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+import environ
+import os
+
+# Initialise environment variables
+env = environ.Env(
+    # set casting, default value
+    DEBUG=(bool, False),
+    UPSCALE_MARGIN=(int, 1998),
+    DOWNSCALE_MARGIN=(int, 2999),
+    SLEEP_TIME=(int, 60)
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Take environment variables from .env file
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-lra^8^j!1)%_$z0he^$8wkrkwu^n=pey+l)%=kxeb_iri=oggz'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = [ '*' ]
 
 # Application definition
 
@@ -127,5 +139,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # App parameters
 
-UPSCALE_MARGIN = 1998
-DOWNSCALE_MARGIN = 3000
+UPSCALE_MARGIN = env('UPSCALE_MARGIN')
+DOWNSCALE_MARGIN = env('DOWNSCALE_MARGIN')
+SLEEP_TIME = env('SLEEP_TIME')
