@@ -1,6 +1,6 @@
 # playlivechess-manager
 
-Django app to manage gameservers running on AWS ECS
+Django app (henceforth referred to as manager app) to manage gameservers running on AWS ECS.
 
 ## Functionality
 
@@ -21,7 +21,24 @@ Django app to manage gameservers running on AWS ECS
 
 ### Design
 
-* Current implemetation is not thread safe. Run the django app as a singel thread only (preferably using `./manage.py runserver`)
+* Autoscaling Logic:
+    * The instance of ServerManagerThread (a singleton class) handles the server management and autoscaling.
+    * It stores a list of all active service instances.
+        * Upon a client request, it returns the address of a server from this list to which the client can connect
+        * Each service instance provides api to query available capacity and a flag (ready_to_close) to signal if it can be terminated
+    * A thread keeps running in the background and carries out routinely updates and maintainance.
+    * In these updates it checks the state/health of each running service instance using the api it provides.
+    * Then it aggreagtes the updates to calculate total available capacity.
+        * Upscale and downscale margins are given as environment variable while launching the manager app
+        * If the total available capacity is less than the upscale margin, then a new instance is launched
+        * If the total available capacity is more than the downscale margin, then one of the existing instances is kept in standby. We cannot directly terminate it as it may still have some active connections.
+        * If standby servers are ready to close, we terminate them.
+    
+    * The regular server updates facillitates auto-scaling (elasticity) as well as recovery in case of failure (fault tolerance)
+    * On startup, the manager app contructs its initial state by querying the relevant AWS ECS cluster for running server instances. Consequently, if the manager app fails, we just need to re-launch the app and it will recover state (Fault tolerance). 
+
+* Current implemetation is not thread safe. Run the manager app as a single thread only (preferably using `./manage.py runserver`)
+* For the sake of simplicity, it is assumed that no one interferes with the ECS resources other than the manager app while its running. Nonetheless, it can be modified to sync state with AWS resource if needed. We don't so this currently as it will severely impact the performance and complexity of the app.
 * For now computing power provided by RUNNING EC2 instances in the cluster are assumed to be suffiecient to meet the demand. This may not be the case always as one EC2 instance can only handle limited number of container instances. To overcome this issue, we will place one task one EC2 instance and scale EC2 instances along with ECS. This will allow simple EC2 scaling. (look for `distinctInstance` task placement contraint in [docs](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-placement-constraints.html)). Relevant sections commented with `TODO: EC2 scaling`
     * If we follow this we need to handle the case where EC2 instances are already available ?
 * Default cluster of AWS ECS is used for now. AWS API calls where cluster needs to specified are marked with the comment `DEFAULT_CLUSTER`.

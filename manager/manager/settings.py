@@ -27,7 +27,7 @@ env = environ.Env(
     ECS_INSTANCE_LAUNCH_TEMPLATE=(str, "defaultECS"),
     GAMESERVER_TASK_DEFINITION=(str, 'LaunchGameserver'),
     BACKUP_GAMESERVER=(str, "127.0.0.1:8888"),
-    SLEEP_TIME=(int, 60)
+    THREAD_SLEEP_TIME=(int, 60)
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -153,7 +153,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 UPSCALE_MARGIN = env('UPSCALE_MARGIN')
 DOWNSCALE_MARGIN = env('DOWNSCALE_MARGIN')
-SLEEP_TIME = env('SLEEP_TIME')
+THREAD_SLEEP_TIME = env('THREAD_SLEEP_TIME')
 GAMESERVER_CAPACITY = env('GAMESERVER_CAPACITY')
 BACKUP_GAMESERVER = env('BACKUP_GAMESERVER')
 
