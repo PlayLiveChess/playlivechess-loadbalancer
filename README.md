@@ -26,6 +26,7 @@ Django app to manage gameservers running on AWS ECS
     * If we follow this we need to handle the case where EC2 instances are already available ?
 * Default cluster of AWS ECS is used for now. AWS API calls where cluster needs to specified are marked with the comment `DEFAULT_CLUSTER`.
 * Error/Handling is skipped in a lot of places. These places are marked with the comment `TODO: Error Handling`
+* In case, the app is unable to fetch an available gameserver, it provides the address of a backup gameserver. This can even be used for testing gameserver hosted on localhost
 
 ## Doubts
 
@@ -67,6 +68,7 @@ AWS_REGION=ap-south-1
 ECS_INSTANCE_LAUNCH_TEMPLATE=defaultECS
 GAMESERVER_TASK_DEFINITION=LaunchGameserver
 SLEEP_TIME=10
+BACKUP_GAMESERVER=127.0.0.1:8888
 ```
 ### Commands to run
 * Ensure the default cluster has enough capacity (EC2 instances)
