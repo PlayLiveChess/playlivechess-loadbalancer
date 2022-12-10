@@ -14,6 +14,8 @@ from pathlib import Path
 import environ
 import os
 
+import boto3
+
 # Initialise environment variables
 env = environ.Env(
     # set casting, default value
@@ -22,6 +24,8 @@ env = environ.Env(
     DOWNSCALE_MARGIN=(int, 2000),
     GAMESERVER_CAPACITY=(int, 1000),
     AWS_REGION=(str, "ap-south-1"),
+    ECS_INSTANCE_LAUNCH_TEMPLATE=(str, "defaultECS"),
+    GAMESERVER_TASK_DEFINITION=(str, 'LaunchGameserver'),
     SLEEP_TIME=(int, 60)
 )
 
@@ -153,5 +157,9 @@ GAMESERVER_CAPACITY = env('GAMESERVER_CAPACITY')
 
 assert (DOWNSCALE_MARGIN - UPSCALE_MARGIN) > GAMESERVER_CAPACITY
 
+# AWS Configurations
 AWS_REGION = env('AWS_REGION')
-
+ECS_CLIENT = boto3.client("ecs", region_name = AWS_REGION)
+EC2_CLIENT = boto3.client("ec2", region_name = AWS_REGION)
+ECS_INSTANCE_LAUNCH_TEMPLATE = env('ECS_INSTANCE_LAUNCH_TEMPLATE')
+GAMESERVER_TASK_DEFINITION = env('GAMESERVER_TASK_DEFINITION')

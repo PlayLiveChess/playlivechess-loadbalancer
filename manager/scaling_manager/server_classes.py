@@ -2,7 +2,7 @@ from time import sleep
 from django.conf import settings
 import requests
 from threading import Thread
-from .aws_utils import launch_gameserver, get_address, stop_gameserver_task, get_gameserver_tasks
+from .aws_utils import launch_gameserver, get_address, stop_task, get_gameserver_tasks
 
 class Server():
     def __init__(self, task_arn: str):
@@ -117,7 +117,7 @@ class ServerManagerThread(Thread):
                 print("Removing extra servers")
 
                 if s.ready_to_close:
-                    stop_gameserver_task(s.task_arn, "Deprovisioning")
+                    stop_task(s.task_arn, "Deprovisioning")
                 else:
                     remaining_extra_servers.append(s)
             
