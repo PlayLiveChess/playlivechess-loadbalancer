@@ -4,7 +4,7 @@ from time import sleep
 from django.conf import settings
 import requests
 from threading import Thread
-from .aws_utils import launch_gameserver, get_ip, get_exposed_port, get_ec2_id, get_task_description, running_task_waiter, stop_task, get_gameserver_tasks
+from .aws_utils import *
 
 class Server():
     """
@@ -74,9 +74,10 @@ class ServerManagerThread(Thread):
             ServerManagerThread.__shared_instance = self
             self.setDaemon(True)
             
+            self.task_family = settings.SERVER_TASK_DEFINITION
+
             try:
-                # TODO: Replace this with a generic call for all tasks
-                task_arns: list = get_gameserver_tasks()
+                task_arns: list = get_tasks(self.task_family)
                 self.available_servers: list = [Server(arn) for arn in task_arns]
             except Exception as e:
                 print("Unable to get active tasks in the cluster due to the following exception")
@@ -110,9 +111,8 @@ class ServerManagerThread(Thread):
         Returns True if successful and False otheriwse
         """
         try:
-            # TODO: Replace this with a generic call for all tasks
-            gs_task = launch_gameserver()
-            self.available_servers.append(Server(gs_task))
+            task = launch_task(self.task_family)
+            self.available_servers.append(Server(task))
             return True
         except Exception as e:
             print(e)

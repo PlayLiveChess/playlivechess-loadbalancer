@@ -9,8 +9,8 @@ Django app (henceforth referred to as manager app) to manage gameservers running
 
 ### API
 
-* Hit the "available-server/" api to get gameserver
-* Hit the "available-server-list/" api to get list of gameservers running
+* Hit the "available-gameserver/" api to get gameserver
+* Hit the "available-gameserver-list/" api to get list of gameservers running
 <!--- TODO: add response json format/example -->
 
 ## Notes
@@ -50,7 +50,6 @@ Django app (henceforth referred to as manager app) to manage gameservers running
 * For now computing power provided by RUNNING EC2 instances in the cluster are assumed to be suffiecient to meet the demand. This may not be the case always as one EC2 instance can only handle limited number of container instances. To overcome this issue, we will place one task one EC2 instance and scale EC2 instances along with ECS. This will allow simple EC2 scaling. (look for `distinctInstance` task placement contraint in [docs](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-placement-constraints.html)). Relevant sections commented with `TODO: EC2 scaling`
     * If we follow this we need to handle the case where EC2 instances are already available ?
 * Default cluster of AWS ECS is used for now. AWS API calls where cluster needs to specified are marked with the comment `DEFAULT_CLUSTER`.
-* Error/Handling is skipped in a lot of places. These places are marked with the comment `TODO: Error Handling`
 * In case, the app is unable to fetch an available gameserver, it provides the address of a backup gameserver. This can even be used for testing gameserver hosted on localhost
 
 ## Doubts
@@ -62,7 +61,7 @@ Django app (henceforth referred to as manager app) to manage gameservers running
 * [boto3 tutorial for ECS] https://hands-on.cloud/working-with-ecs-in-python-using-boto3/
 * [ECS clsuter auto scaling doc] https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-auto-scaling.html
 * [Resource limit error on run_task] https://stackoverflow.com/questions/54466796/getting-resourcememory-error-on-a-new-cluster-in-aws-ecs
-* [get public ip of gameserver] https://stackoverflow.com/questions/37728119/aws-ecs-get-public-ip-of-the-instance-container-when-start-task-is-called
+* [get public ip of task] https://stackoverflow.com/questions/37728119/aws-ecs-get-public-ip-of-the-instance-container-when-start-task-is-called
 * [Youtube tutorial for Deployment on ECS](https://www.youtube.com/watch?v=zs3tyVgiBQQ&t=350s)
 
 ## Setup
@@ -88,11 +87,11 @@ SECRET_KEY=lol
 DEBUG=False
 UPSCALE_MARGIN=4
 DOWNSCALE_MARGIN=18
-GAMESERVER_CAPACITY=10
+SERVER_CAPACITY=10
 AWS_REGION=ap-south-1
 ECS_INSTANCE_LAUNCH_TEMPLATE=defaultECS
-GAMESERVER_TASK_DEFINITION=LaunchGameserver
-SLEEP_TIME=10
+SERVER_TASK_DEFINITION=LaunchGameserver
+SLEEP_TIME=0
 BACKUP_GAMESERVER=127.0.0.1:8888
 ```
 ### Commands to run

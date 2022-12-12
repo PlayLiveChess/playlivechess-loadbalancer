@@ -72,16 +72,12 @@ def launch_task(task_definition: str) -> str:
     task_arn = response['tasks'][0]["taskArn"]
     return task_arn
 
-def launch_gameserver_task() -> str:
-    """ Inititates the gameserver task and returns the task arn"""
-    return launch_task(settings.GAMESERVER_TASK_DEFINITION)
-
-def get_gameserver_tasks() -> list:
-    """Returns list of gameserver tasks with desired status = RUNNING"""
+def get_tasks(task_family: str) -> list:
+    """Returns the list of tasks (arns) of the specified family with desired status = RUNNING"""
     ecs_client = settings.ECS_CLIENT
     task_arns = ecs_client.list_tasks(
         # DEFAULT_CLUSTER
-        family=settings.GAMESERVER_TASK_DEFINITION,
+        family=task_family,
         desiredStatus='RUNNING'
     )['taskArns']
     return task_arns
@@ -95,13 +91,6 @@ def stop_task(task_arn: str, reason_to_stop: str = "Not specified"):
         reason=reason_to_stop
     )
     
-
-def launch_gameserver() -> str:
-    """ Runs an ECS instance, waits for it to start running and then initiates gameserver task"""
-    # TODO: launch ecs instance
-    # TODO: EC2 scaling
-    return launch_gameserver_task()
-
 def launch_ecs_instance():
     """Launches an ECS instance"""
     # DEFAULT_CLUSTER: Refer to user data section of https://docs.aws.amazon.com/AmazonECS/latest/developerguide/launch_container_instance.html#linux-liw-advanced-details for additional steps required to use a different cluster
