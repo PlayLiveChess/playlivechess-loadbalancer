@@ -73,14 +73,22 @@ class ServerManagerThread(Thread):
             Thread.__init__(self)
             ServerManagerThread.__shared_instance = self
             self.setDaemon(True)
+            
+            try:
+                # TODO: Replace this with a generic call for all tasks
+                task_arns: list = get_gameserver_tasks()
+                self.available_servers: list = [Server(arn) for arn in task_arns]
+            except Exception as e:
+                print("Unable to get active tasks in the cluster due to the following exception")
+                print(e)
+                self.available_servers: list = []
 
-            task_arns: list = get_gameserver_tasks() # TODO: Error Handling 
-            # TODO: Replace this with a generic call for all tasks
-            self.available_servers: list = [Server(arn) for arn in task_arns]
             self.standby_servers: list = []
+
             self.total_available_capacity: int = 0
             for s in self.available_servers:
                 self.total_available_capacity += s.available_capacity
+
             self.upscale_margin: int = settings.UPSCALE_MARGIN
             self.downscale_margin: int = settings.DOWNSCALE_MARGIN
             self.thread_sleep_time: int = settings.THREAD_SLEEP_TIME
@@ -140,13 +148,13 @@ class ServerManagerThread(Thread):
 
             new_total_available_capacity = 0 # reset total available capacity
             for s in self.available_servers:
-                s.update_state() # TODO: Error Handling; Make multiple attempts and then fail
-                new_total_available_capacity += s.available_capacity
+                if s.update_state():
+                    new_total_available_capacity += s.available_capacity
 
             self.total_available_capacity = new_total_available_capacity
             
             for s in self.standby_servers:
-                s.update_state() # TODO: Error Handling; Make multiple attempts and then fail
+                s.update_state()
 
             print("state updated")
             print("Total Available Capacity", end=': ')

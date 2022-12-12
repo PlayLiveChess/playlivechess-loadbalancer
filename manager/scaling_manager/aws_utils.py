@@ -1,5 +1,6 @@
 """
 This module has functions to perform certain AWS operations (required by our app) using boto3
+Note: There is no exception handling done by the module functions. Exceptions must be handled by the calling functions.
 """
 from django.conf import settings
 
@@ -33,7 +34,6 @@ def get_task_description(task_arn: str, ecs_client) -> dict:
 
 def get_exposed_port(task_description: dict) -> str:
     """Extracts and returns the port exposed from task description of a running task"""
-    # throws exceptions in case task_description doesn't have port
     network_binding = task_description['containers'][0]['networkBindings'][0]
     port: str = str(network_binding['hostPort'])
     return port
@@ -62,7 +62,6 @@ def get_ip(ec2_id: str, ec2_client) -> str:
     
 def launch_task(task_definition: str) -> str:
     """ Inititates a task and returns the task arn """
-    # TODO: Error Handling
     ecs_client = settings.ECS_CLIENT
     response = ecs_client.run_task(
         taskDefinition=task_definition,
@@ -89,7 +88,6 @@ def get_gameserver_tasks() -> list:
 
 def stop_task(task_arn: str, reason_to_stop: str = "Not specified"):
     """Stops the given task"""
-    # TODO: Error Handling
     ecs_client = settings.ECS_CLIENT
     response = ecs_client.stop_task(
         # DEFAULT_CLUSTER
@@ -100,7 +98,6 @@ def stop_task(task_arn: str, reason_to_stop: str = "Not specified"):
 
 def launch_gameserver() -> str:
     """ Runs an ECS instance, waits for it to start running and then initiates gameserver task"""
-    # TODO: Error Handling
     # TODO: launch ecs instance
     # TODO: EC2 scaling
     return launch_gameserver_task()
@@ -108,7 +105,6 @@ def launch_gameserver() -> str:
 def launch_ecs_instance():
     """Launches an ECS instance"""
     # DEFAULT_CLUSTER: Refer to user data section of https://docs.aws.amazon.com/AmazonECS/latest/developerguide/launch_container_instance.html#linux-liw-advanced-details for additional steps required to use a different cluster
-    # TODO: Error Handling
     ec2_client = settings.EC2_CLIENT
     response = ec2_client.run_instances(
         MaxCount=1,
