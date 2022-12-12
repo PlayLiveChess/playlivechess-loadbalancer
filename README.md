@@ -24,14 +24,14 @@ Django app (henceforth referred to as manager app) to manage gameservers running
 * ECR:
 * task:
 * task_definition:
-* server instance:
+* server instance: We refer to a task deployed on an ECS instance as server instance.
 * ARN:
 
 ### Design
 
 * Autoscaling Logic:
     * The instance of ServerManagerThread (a singleton class) handles the server management and autoscaling.
-    * It stores a list of all active service instances.
+    * It stores a list of all active and available service instances.
         * Upon a client request, it returns the address of a server from this list to which the client can connect
         * Each service instance provides api to query available capacity and a flag (ready_to_close) to signal if it can be terminated
     * A thread keeps running in the background and carries out routinely updates and maintainance.
@@ -47,8 +47,7 @@ Django app (henceforth referred to as manager app) to manage gameservers running
 
 * Current implemetation is not thread safe. Run the manager app as a single thread only (preferably using `./manage.py runserver`)
 * For the sake of simplicity, it is assumed that no one interferes with the ECS resources other than the manager app while its running. Nonetheless, it can be modified to sync state with AWS resource if needed. We don't so this currently as it will severely impact the performance and complexity of the app.
-* For now computing power provided by RUNNING EC2 instances in the cluster are assumed to be suffiecient to meet the demand. This may not be the case always as one EC2 instance can only handle limited number of container instances. To overcome this issue, we will place one task one EC2 instance and scale EC2 instances along with ECS. This will allow simple EC2 scaling. (look for `distinctInstance` task placement contraint in [docs](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-placement-constraints.html)). Relevant sections commented with `TODO: EC2 scaling`
-    * If we follow this we need to handle the case where EC2 instances are already available ?
+* We place each task on a distinct EC2 instance and scale EC2 instances along with ECS tasks.
 * Default cluster of AWS ECS is used for now. AWS API calls where cluster needs to specified are marked with the comment `DEFAULT_CLUSTER`.
 * In case, the app is unable to fetch an available gameserver, it provides the address of a backup gameserver. This can even be used for testing gameserver hosted on localhost
 

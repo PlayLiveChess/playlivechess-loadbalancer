@@ -111,8 +111,21 @@ class ServerManagerThread(Thread):
         Returns True if successful and False otheriwse
         """
         try:
+            launch_ecs_instance()
             task = launch_task(self.task_family)
             self.available_servers.append(Server(task))
+            return True
+        except Exception as e:
+            print(e)
+            return False
+    
+    def remove_server(self, redundant_server: Server) -> bool:
+        """
+        Attempts to remove the specified server instance terminating the EC2 instance (along with task)
+        Returns True if successful and False otheriwse
+        """
+        try:
+            terminate_ec2(redundant_server.ec2_id)
             return True
         except Exception as e:
             print(e)
@@ -185,7 +198,7 @@ class ServerManagerThread(Thread):
                 print("Removing extra servers")
 
                 if s.ready_to_close:
-                    stop_task(s.task_arn, "Deprovisioning")
+                    self.remove_server(s)
                 else:
                     remaining_standby_servers.append(s)
             
