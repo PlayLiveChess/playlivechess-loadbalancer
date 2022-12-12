@@ -4,7 +4,7 @@ from time import sleep
 from django.conf import settings
 import requests
 from threading import Thread
-from .aws_utils import launch_gameserver, get_address, stop_task, get_gameserver_tasks
+from .aws_utils import launch_gameserver, get_ip, get_exposed_port, get_ec2_id, get_task_description, running_task_waiter, stop_task, get_gameserver_tasks
 
 class Server():
     """
@@ -20,10 +20,18 @@ class Server():
 
     def __init__(self, task_arn: str):
         """Waits for the task to transition to RUNNING state and then retrieves and stores relevant details about it."""
-        # TODO: Error Handling
         self.task_arn: str = task_arn
-        self.address: str = get_address(self.task_arn)
+        running_task_waiter(task_arn, settings.ECS_CLIENT)
         self.status: str = 'RUNNING'
+        
+        task_description = get_task_description(task_arn, settings.ECS_CLIENT)
+
+        self.ec2_id: str = get_ec2_id(task_description, settings.ECS_CLIENT)
+
+        port: str = get_exposed_port(task_description)
+        ip: str = get_ip(self.ec2_id, settings.EC2_CLIENT)
+        self.address: str = ip + ":" + port
+
         self.available_capacity: int = 0
         self.ready_to_close: bool = False
         # self.update_state()
@@ -94,6 +102,7 @@ class ServerManagerThread(Thread):
         Returns True if successful and False otheriwse
         """
         try:
+            # TODO: Replace this with a generic call for all tasks
             gs_task = launch_gameserver()
             self.available_servers.append(Server(gs_task))
             return True

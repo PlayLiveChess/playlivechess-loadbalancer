@@ -1,8 +1,6 @@
 """
 This module has functions to perform certain AWS operations (required by our app) using boto3
 """
-import boto3
-import botocore
 from django.conf import settings
 
 # uncomment if running this separately (probably if MAIN)
@@ -10,60 +8,58 @@ from django.conf import settings
 # ec2_client = boto3.client("ec2", region_name = "ap-south-1")
 # ec2_launch_template = 'defaultECS'
 
-def get_address(task_arn: str) -> str:
-    """ Returns the ip address of the ECS instance on which the task is running. 
-    If the task is in PENDING state, it waits for it to run. 
-    In case of error, it returns an empty string and prints the error on console.
-    """
-    # TODO: Divide into multiple functions
-    ecs_client = settings.ECS_CLIENT
-    ec2_client = settings.EC2_CLIENT
+# all these functions throw exceptions if something is off and don't handle any unexpected paramters or api responses
+
+def running_task_waiter(task_arn: str, ecs_client) -> None:
+    """Waits for the specified task to start running"""
     task_waiter = ecs_client.get_waiter('tasks_running')
-    try:
-        # wait till task status = 'RUNNING'
-        task_waiter.wait(
-            # DEFAULT_CLUSTER
-            tasks=[
-                task_arn,
-            ]
-        )
-        # Get task info
-        task_description = ecs_client.describe_tasks(
-            # DEFAULT_CLUSTER
-            tasks=[
-                task_arn,
-            ]
-        )['tasks'][0]
-        # Extract port exposed
-        network_binding = task_description['containers'][0]['networkBindings'][0]
-        gs_port: str = str(network_binding['hostPort'])
-        
-        # Get ecs instance info
-        container_instance_arn = task_description['containerInstanceArn']
-        container_description = ecs_client.describe_container_instances(
-            # DEFAULT_CLUSTER
-            containerInstances=[
-                container_instance_arn,
-            ]
-        )['containerInstances'][0]
-        ec2_id: str = container_description['ec2InstanceId'] # Extract ec2 id 
+    # wait till task status = 'RUNNING'
+    task_waiter.wait(
+        # DEFAULT_CLUSTER
+        tasks=[
+            task_arn,
+        ]
+    )
 
-        # Get Public IP address of the EC2 instance
-        ec2_instance_description = ec2_client.describe_instances(
-            InstanceIds=[
-               ec2_id,
-            ]
-        )['Reservations'][0]['Instances'][0]
-        gs_ip: str = str(ec2_instance_description['PublicIpAddress'])
+def get_task_description(task_arn: str, ecs_client) -> dict:
+    """Returns description of the specified task"""
+    task_description = ecs_client.describe_tasks(
+        # DEFAULT_CLUSTER
+        tasks=[
+            task_arn,
+        ]
+    )['tasks'][0]
+    return task_description
 
-        gs_address = gs_ip + ":" + gs_port
-        # print(gs_address)
-        return gs_address
+def get_exposed_port(task_description: dict) -> str:
+    """Extracts and returns the port exposed from task description of a running task"""
+    # throws exceptions in case task_description doesn't have port
+    network_binding = task_description['containers'][0]['networkBindings'][0]
+    port: str = str(network_binding['hostPort'])
+    return port
+
+def get_ec2_id(task_description: dict, ecs_client) -> str:
+    """Returns ec2 id of the instance on which task is running"""
+    container_instance_arn = task_description['containerInstanceArn']
+    container_description = ecs_client.describe_container_instances(
+        # DEFAULT_CLUSTER
+        containerInstances=[
+            container_instance_arn,
+        ]
+    )['containerInstances'][0]
+    ec2_id: str = container_description['ec2InstanceId'] # Extract ec2 id 
+    return ec2_id
+
+def get_ip(ec2_id: str, ec2_client) -> str:
+    """Returns the Public IP address of the EC2 instance"""
+    ec2_instance_description = ec2_client.describe_instances(
+        InstanceIds=[
+            ec2_id,
+        ]
+    )['Reservations'][0]['Instances'][0]
+    ip: str = str(ec2_instance_description['PublicIpAddress'])
+    return ip
     
-    except Exception as e:
-        print(e.message)
-        return ""
-
 def launch_task(task_definition: str) -> str:
     """ Inititates a task and returns the task arn """
     # TODO: Error Handling

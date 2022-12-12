@@ -18,6 +18,14 @@ Django app (henceforth referred to as manager app) to manage gameservers running
 ### Terms
 
 * boto3: aws sdk for python
+#### TODO:
+* cluster:
+* ECS:
+* ECR:
+* task:
+* task_definition:
+* server instance:
+* ARN:
 
 ### Design
 
