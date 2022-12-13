@@ -160,14 +160,19 @@ class ServerManagerThread(Thread):
         while(True):
 
             new_total_available_capacity = 0 # reset total available capacity
+            unresponsive_servers: list = [] # maintain a list of servers which don't respond to health checks
             for s in self.available_servers:
-                if s.update_state():
-                    new_total_available_capacity += s.available_capacity
+                if not s.update_state():
+                    # server isn't responding to health check
+                    s.available_capacity = 0
+                    unresponsive_servers.append(s)
+                new_total_available_capacity += s.available_capacity
 
             self.total_available_capacity = new_total_available_capacity
             
             for s in self.standby_servers:
-                s.update_state()
+                if not s.update_state():
+                    unresponsive_servers.append(s)
 
             print("state updated")
             print("Total Available Capacity", end=': ')
@@ -206,5 +211,14 @@ class ServerManagerThread(Thread):
             
             print("Ending server_update and sleeping")
             sleep(self.thread_sleep_time) # Wait a little before the next update
+            # Unresponsive servers were given some time to recover
+            # If they don't respond to health checks even now, then remove them
+            for s in unresponsive_servers:
+                if not s.update_state():
+                    if s in self.available_servers:
+                        self.available_servers.remove(s)
+                    elif s in self.standby_servers:
+                        self.standby_servers.remove(s)                    
+                    self.remove_server(s)
             
         return
